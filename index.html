@@ -1,103 +1,102 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Ranking (Zabezpieczony)</title>
+  <meta charset="UTF-8" />
+  <title>Ranking Streama</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      background: transparent;
-      font-family: sans-serif;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      margin: 0; padding: 0;
+      background-color: transparent !important;
+      overflow: hidden;
       height: 100vh;
+      width: 100vw;
+      font-family: Arial, sans-serif;
     }
-
-    .auth, .frame-container {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: transparent;
+    body {
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-    }
-
-    input {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: none;
-      margin-top: 10px;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+      align-items: center;
       background: transparent;
-      position: absolute;
-      top: -100%;
-      opacity: 0;
-      transition: top 1s ease-in-out, opacity 1s ease-in-out;
+      overflow: hidden;
     }
-
+    #container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    iframe {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      top: 100%;
+      left: 0;
+      opacity: 0;
+      transition: top 1.2s ease, opacity 1.2s ease;
+      background: transparent;
+    }
     iframe.active {
       top: 0;
       opacity: 1;
+      z-index: 10;
     }
   </style>
+  <script>
+    const url = new URL(window.location.href);
+    const correctPassword = "streamon";
+    const param = url.searchParams.get("pass");
+
+    if (param !== correctPassword) {
+      const input = prompt("Podaj hasło aby kontynuować:");
+      if (input !== correctPassword) {
+        alert("Złe hasło!");
+        document.body.innerHTML = "";
+        throw new Error("Brak dostępu");
+      }
+    }
+
+    // Linki do rankingów
+    const links = [
+      "https://tikfinity.zerody.one/widget/topliker?cid=1946028",
+      "https://tikfinity.zerody.one/widget/topgifter?cid=1946028",
+      "https://tikfinity.zerody.one/widget/ranking?cid=1946028"
+    ];
+
+    let current = 0;
+
+    function showNext() {
+      const iframes = document.querySelectorAll("iframe");
+      iframes.forEach((frame, i) => {
+        frame.classList.remove("active");
+        frame.style.top = "100%";
+        frame.style.opacity = "0";
+        frame.style.zIndex = "1";
+      });
+
+      const nextFrame = iframes[current];
+      nextFrame.classList.add("active");
+      nextFrame.style.top = "0";
+      nextFrame.style.opacity = "1";
+      nextFrame.style.zIndex = "10";
+
+      current = (current + 1) % links.length;
+    }
+
+    window.onload = () => {
+      const container = document.getElementById("container");
+      links.forEach(link => {
+        const iframe = document.createElement("iframe");
+        iframe.src = link;
+        iframe.allowTransparency = "true";
+        container.appendChild(iframe);
+      });
+      showNext();
+      setInterval(showNext, 30000); // co 30 sekund zmiana
+    };
+  </script>
 </head>
 <body>
-  <div class="auth">
-    <div>🔐 Wpisz hasło, aby wyświetlić ranking</div>
-    <input type="password" id="password" placeholder="Hasło">
-  </div>
-
-  <div class="frame-container" style="display: none;">
-    <iframe src="https://tikfinity.zerody.one/widget/topliker?cid=1946028" allowtransparency="true"></iframe>
-    <iframe src="https://tikfinity.zerody.one/widget/topgifter?cid=1946028" allowtransparency="true"></iframe>
-    <iframe src="https://tikfinity.zerody.one/widget/ranking?cid=1946028" allowtransparency="true"></iframe>
-  </div>
-
-  <script>
-    const correctPassword = "streamon";
-    const authDiv = document.querySelector('.auth');
-    const frameContainer = document.querySelector('.frame-container');
-    const iframes = frameContainer.querySelectorAll('iframe');
-    let currentIndex = 0;
-
-    document.getElementById('password').addEventListener('keyup', function (e) {
-      if (e.key === 'Enter') {
-        if (this.value === correctPassword) {
-          authDiv.style.display = 'none';
-          frameContainer.style.display = 'block';
-          startRotation();
-        } else {
-          this.value = '';
-          this.placeholder = 'Złe hasło 😢';
-        }
-      }
-    });
-
-    function startRotation() {
-      function showNextFrame() {
-        iframes.forEach((frame, index) => {
-          frame.classList.remove('active');
-          frame.style.zIndex = index === currentIndex ? 1 : 0;
-        });
-
-        iframes[currentIndex].classList.add('active');
-        currentIndex = (currentIndex + 1) % iframes.length;
-      }
-
-      showNextFrame();
-      setInterval(showNextFrame, 30000); // co 30 sekund
-    }
-  </script>
+  <div id="container"></div>
 </body>
 </html>
